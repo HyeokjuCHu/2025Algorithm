@@ -10,7 +10,7 @@ https://gwlabs.tistory.com/50
 #include <string>
 
 using namespace std;
-
+//max heap size = 30
 #define MAX_SIZE 30
 
 struct Student
@@ -25,11 +25,11 @@ class MaxHeap
 private:
     Student heap[MAX_SIZE + 1];
     int size;
-
+    // get parent and child node
     int parent(int i) { return i / 2; }
     int leftChild(int i) { return 2 * i; }
     int rightChild(int i) { return 2 * i + 1; }
-
+    //keep heap when add new element
     void heapifyUp(int index)
     {
         while (index > 1 && heap[parent(index)].score < heap[index].score)
@@ -38,7 +38,7 @@ private:
             index = parent(index);
         }
     }
-
+    //keep heap when delete element
     void heapifyDown(int index)
     {
         int largest = index;
@@ -58,11 +58,11 @@ private:
     }
 
 public:
-    MaxHeap() { size = 0; }
-
+    MaxHeap() { size = 0; }//constructor
+    //insert new element into heap
     void insert(string name, int score, string className)
     {
-        if (size >= MAX_SIZE)
+        if (size >= MAX_SIZE)//If the heap reaches its maximum size
         {
             cout << "Error: The queue is full! Cannot insert more elements." << endl;
             return;
@@ -72,7 +72,7 @@ public:
         heapifyUp(size);
         cout << "New element [" << name << ", " << score << ", " << className << "] has been inserted." << endl;
     }
-
+    //find maximum key
     void maximum()
     {
         if (size == 0)
@@ -82,7 +82,7 @@ public:
         }
         cout << "Element with the largest key: [" << heap[1].name << ", " << heap[1].score << ", " << heap[1].className << "]" << endl;
     }
-
+    //delete maximum key
     void extractMax()
     {
         if (size == 0)
@@ -95,7 +95,7 @@ public:
         size--;
         heapifyDown(1);
     }
-
+    //increase score
     void increaseKey(int index, int newScore)
     {
         if (index < 1 || index > size)
@@ -107,7 +107,7 @@ public:
         heapifyUp(index);
         cout << "Key updated. [" << heap[index].name << ", " << heap[index].score << ", " << heap[index].className << "] has been repositioned in the queue." << endl;
     }
-
+    //print current heap in right order
     void printQueue()
     {
         if (size == 0)
@@ -121,6 +121,7 @@ public:
             cout << i << ". [" << heap[i].name << ", " << heap[i].score << ", " << heap[i].className << "]" << endl;
         }
     }
+    //print score of given index
     int getScore(int index)
     {
         if (index >= 1 && index <= size)
@@ -128,10 +129,11 @@ public:
         return -1;
     }
 };
-
+//print menu
 void runMenu()
 {
     MaxHeap heap;
+    string input;
     char choice;
 
     while (true)
@@ -144,10 +146,13 @@ void runMenu()
         cout << "P : Print all elements in the queue." << endl;
         cout << "Q : Quit." << endl;
         cout << "Choose menu: ";
-        cin >> choice;
-        cin.ignore();
-
-        choice = toupper(choice);
+        getline(cin, input);//get one line
+        int i = 0;
+        while (i < input.length() && input[i] == ' ') {//check for valid 1 char
+            i++;
+        }
+        if (i == input.length()) continue;//if no exist, another input
+        choice = toupper(input[i]);
 
         if (choice == 'I')
         {
@@ -194,8 +199,7 @@ void runMenu()
         else if (choice == 'P')
         {
             heap.printQueue();
-        }
-        //hi
+        } 
         else if (choice == 'Q')
         {
             cout << "Program terminated." << endl;
