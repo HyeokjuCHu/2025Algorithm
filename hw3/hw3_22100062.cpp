@@ -1,11 +1,11 @@
 #include <iostream>
 #include <climits>
 #include <vector>
-#include <chrono>
+#include <ctime>  // clock()
 
 using namespace std;
-using namespace std::chrono;
 
+// 재귀 방식
 int recursive(int k, int n) {
     if (k == 1) return n;
     if (n == 0 || n == 1) return n;
@@ -23,6 +23,7 @@ int recursive(int k, int n) {
     return min_attempts;
 }
 
+// DP 방식
 int dpSolution(int k, int n) {
     vector<vector<int>> dp(k + 1, vector<int>(n + 1, 0));
 
@@ -49,24 +50,27 @@ int main() {
     cout << "Enter the number of fragile objects (k): ";
     cin >> k;
 
-    auto start_rec = high_resolution_clock::now();
+    // Recursive 방식 시간 측정
+    clock_t start1 = clock();
     int rec_result = recursive(k, n);
-    auto end_rec = high_resolution_clock::now();
-    auto duration_rec = duration_cast<milliseconds>(end_rec - start_rec);
+    clock_t stop1 = clock();
+    double rec_duration = (double)(stop1 - start1) / CLOCKS_PER_SEC;
 
-    auto start_dp = high_resolution_clock::now();
+    // DP 방식 시간 측정
+    clock_t start2 = clock();
     int dp_result = dpSolution(k, n);
-    auto end_dp = high_resolution_clock::now();
-    auto duration_dp = duration_cast<milliseconds>(end_dp - start_dp);
+    clock_t stop2 = clock();
+    double dp_duration = (double)(stop2 - start2) / CLOCKS_PER_SEC;
 
+    // 출력
     cout << "\n--- Results ---" << endl;
-    cout << "Recursive Solution:" << endl;
-    cout << "Minimum number of drops: " << rec_result << endl;
-    cout << "Execution time: " << duration_rec.count() << " ms" << endl;
+    cout << "Recursive Solution: " << endl;
+    cout << "Minimum number of drops = " << rec_result << endl;
+    cout << "Time elapsed = " << rec_duration << " seconds" << endl;
 
-    cout << "\nDP Solution:" << endl;
-    cout << "Minimum number of drops: " << dp_result << endl;
-    cout << "Execution time: " << duration_dp.count() << " ms" << endl;
+    cout << "\nDP Solution: " << endl;
+    cout << "Minimum number of drops = " << dp_result << endl;
+    cout << "Time elapsed = " << dp_duration << " seconds" << endl;
 
     return 0;
 }
