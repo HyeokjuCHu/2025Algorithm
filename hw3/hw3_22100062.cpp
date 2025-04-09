@@ -6,7 +6,6 @@
 using namespace std;
 using namespace std::chrono;
 
-// 재귀 방식
 int recursive(int k, int n) {
     if (k == 1) return n;
     if (n == 0 || n == 1) return n;
@@ -24,15 +23,12 @@ int recursive(int k, int n) {
     return min_attempts;
 }
 
-// 동적 계획법 방식
 int dpSolution(int k, int n) {
     vector<vector<int>> dp(k + 1, vector<int>(n + 1, 0));
 
-    // Base case
-    for (int i = 1; i <= k; i++) dp[i][0] = 0; // 0층은 0번 시도
-    for (int j = 1; j <= n; j++) dp[1][j] = j; // 공 하나면 일일이 시도
+    for (int i = 1; i <= k; i++) dp[i][0] = 0;
+    for (int j = 1; j <= n; j++) dp[1][j] = j;
 
-    // DP 채우기
     for (int i = 2; i <= k; i++) {
         for (int j = 1; j <= n; j++) {
             dp[i][j] = INT_MAX;
@@ -53,13 +49,11 @@ int main() {
     cout << "Enter the number of fragile objects (k): ";
     cin >> k;
 
-    // Recursive 측정
     auto start_rec = high_resolution_clock::now();
     int rec_result = recursive(k, n);
     auto end_rec = high_resolution_clock::now();
     auto duration_rec = duration_cast<milliseconds>(end_rec - start_rec);
 
-    // DP 측정
     auto start_dp = high_resolution_clock::now();
     int dp_result = dpSolution(k, n);
     auto end_dp = high_resolution_clock::now();
