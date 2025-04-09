@@ -1,11 +1,10 @@
 #include <iostream>
 #include <climits>
 #include <vector>
-#include <ctime>  // clock()
+#include <ctime>
 
 using namespace std;
 
-// 재귀 방식
 int recursive(int k, int n) {
     if (k == 1) return n;
     if (n == 0 || n == 1) return n;
@@ -23,25 +22,41 @@ int recursive(int k, int n) {
     return min_attempts;
 }
 
-// DP 방식
-int dpSolution(int k, int n) {
-    vector<vector<int>> dp(k + 1, vector<int>(n + 1, 0));
+int DP(int k, int n) {
+    // DP Table: dp[i][j] represents minimum attempts for i objects and j meters
+    int dp[k + 1][n + 1];
 
-    for (int i = 1; i <= k; i++) dp[i][0] = 0;
-    for (int j = 1; j <= n; j++) dp[1][j] = j;
-
-    for (int i = 2; i <= k; i++) {
-        for (int j = 1; j <= n; j++) {
-            dp[i][j] = INT_MAX;
-            for (int x = 1; x <= j; x++) {
-                int worst = 1 + max(dp[i - 1][x - 1], dp[i][j - x]);
-                dp[i][j] = min(dp[i][j], worst);
-            }
-        }
+    // Fill base cases
+    for (int i = 1; i <= k; i++) {
+        dp[i][0] = 0;
+        dp[i][1] = 1;
     }
+    for (int j = 1; j <= n; j++) {
+        dp[1][j] = j;
+    }
+
+    // Fill the DP table
+    for (int i = 2; i <= k; i++) {  // Objects
+        for (int j = 2; j <= n; j++) {  // Meters
+
+            dp[i][j] = INT_MAX;
+
+            // Try dropping from every height X (1 to j)
+            for (int x = 1; x <= j; x++) {
+                // case 1: when object breaks
+                int b = dp[i - 1][x - 1];
+                // case 2: when object survives
+                int s = dp[i][j - x];
+                int worst = 1 + max(b, s);
+                dp[i][j] = min(dp[i][j], worst);  // Take minimum over all trials
+            } // end of for x
+
+        } // end of for j
+    } // end of for i
 
     return dp[k][n];
 }
+
 
 int main() {
     int n, k;
@@ -50,19 +65,16 @@ int main() {
     cout << "Enter the number of fragile objects (k): ";
     cin >> k;
 
-    // Recursive 방식 시간 측정
     clock_t start1 = clock();
     int rec_result = recursive(k, n);
     clock_t stop1 = clock();
     double rec_duration = (double)(stop1 - start1) / CLOCKS_PER_SEC;
 
-    // DP 방식 시간 측정
     clock_t start2 = clock();
-    int dp_result = dpSolution(k, n);
+    int dp_result = DP(k, n);
     clock_t stop2 = clock();
     double dp_duration = (double)(stop2 - start2) / CLOCKS_PER_SEC;
 
-    // 출력
     cout << "\n--- Results ---" << endl;
     cout << "Recursive Solution: " << endl;
     cout << "Minimum number of drops = " << rec_result << endl;
