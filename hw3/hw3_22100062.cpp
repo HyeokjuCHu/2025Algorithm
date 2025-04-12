@@ -23,10 +23,8 @@ int recursive(int k, int n) {
 }
 
 int DP(int k, int n) {
-    // DP Table: dp[i][j] represents minimum attempts for i objects and j meters
     int dp[k + 1][n + 1];
 
-    // Fill base cases
     for (int i = 1; i <= k; i++) {
         dp[i][0] = 0;
         dp[i][1] = 1;
@@ -35,7 +33,6 @@ int DP(int k, int n) {
         dp[1][j] = j;
     }
 
-    // Fill the DP table
     for (int i = 2; i <= k; i++) {  // Objects
         for (int j = 2; j <= n; j++) {  // Meters
 
