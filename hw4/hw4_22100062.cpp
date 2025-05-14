@@ -4,6 +4,7 @@ Brute Force 관련
 ChatGpt
 Branch and bound 관련
 https://www.youtube.com/watch?v=x2VnAMSH9Is
+https://seungjuitmemo.tistory.com/110
 DP 관련
 hw3_22100062.cpp
 Greedy 관련
@@ -29,6 +30,7 @@ struct Item { //구조체
     double ratio;
 };
 
+//generate random items
 vector<Item> generateItems(int n) {
     srand(100);
     vector<Item> items(n);
@@ -37,10 +39,10 @@ vector<Item> generateItems(int n) {
         items[i].weight = rand() % 100 + 1;
         items[i].ratio = (double)items[i].benefit / items[i].weight;
     }
-    return items;
+    return items; //return the generated list of items
 }
 
-// 1. Brute Force
+// 1. Brute Force by ChatGpt
 int knapsackBrute(const vector<Item>& items, int W, int idx = 0, int currWeight = 0, int currBenefit = 0) {
     if (idx == items.size()) return (currWeight <= W) ? currBenefit : 0;
     int include = knapsackBrute(items, W, idx + 1, currWeight + items[idx].weight, currBenefit + items[idx].benefit);
@@ -54,11 +56,12 @@ double knapsackGreedy(vector<Item> items, int W) {
         return a.ratio > b.ratio;
     });
     double totalBenefit = 0;
+    // Greedy pick items to fill the knapsack
     for (auto& item : items) {
-        if (W >= item.weight) {
-            W -= item.weight;
+        if (W >= item.weight) { //item can fit in the knapsack
+            W -= item.weight; //가능한 용량 줄이기
             totalBenefit += item.benefit;
-        } else {
+        } else {//take the fractional part
             totalBenefit += item.ratio * W;
             break;
         }
@@ -86,12 +89,12 @@ struct Node {
     int level, benefit, weight;
     double bound;
     bool operator<(const Node& n) const {
-        return bound < n.bound;
+        return bound < n.bound;// compare nodes based on bound
     }
 };
 
 double bound(const Node& u, int W, int n, const vector<Item>& items) {
-    if (u.weight >= W) return 0;
+    if (u.weight >= W) return 0; //최대용량 넘어가면 0으로 return
     double profitBound = u.benefit;
     int j = u.level + 1;
     int totWeight = u.weight;
@@ -115,8 +118,8 @@ int knapsackBB(vector<Item> items, int W) {
     Node u, v;
     int n = items.size();
     v.level = -1; v.benefit = v.weight = 0;
-    v.bound = bound(v, W, n, items);
-    Q.push(v);
+    v.bound = bound(v, W, n, items); // calculate the bound for the initial node
+    Q.push(v);//add the initial node to the priority queue
     int maxProfit = 0;
 
     while (!Q.empty()) {
@@ -126,7 +129,7 @@ int knapsackBB(vector<Item> items, int W) {
             u.weight = v.weight + items[u.level].weight;
             u.benefit = v.benefit + items[u.level].benefit;
 
-            if (u.weight <= W && u.benefit > maxProfit)
+            if (u.weight <= W && u.benefit > maxProfit) //더 나은 답이면 maxProfit 최신화
                 maxProfit = u.benefit;
 
             u.bound = bound(u, W, n, items);
@@ -144,7 +147,7 @@ int knapsackBB(vector<Item> items, int W) {
 // 테스트 및 출력
 void test(int n) {
     auto items = generateItems(n);
-    int W = n * 25;
+    int W = n * 25;// set knapsack capacity based on the number of items
 
     cout << "Items: " << n << ", Capacity: " << W << endl;
 
