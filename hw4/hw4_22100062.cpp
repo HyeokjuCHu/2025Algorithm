@@ -11,10 +11,10 @@ https://github.com/Kumar-laxmi/Algorithms/blob/main/C%2B%2B/Greedy-Algorithm/fra
 Blog:
 
 */
-#include <iostream>
-#include <vector>
+#include <iostream> //기본 입출력
+#include <vector>   //
 #include <algorithm>
-#include <chrono>
+#include <chrono>   //시간 측정 및 처리
 #include <cstdlib>
 #include <ctime>
 #include <queue>
