@@ -1,3 +1,16 @@
+/*
+Reference:
+Brute Force 관련
+ChatGpt
+Branch and bound 관련
+https://www.youtube.com/watch?v=x2VnAMSH9Is
+DP 관련
+hw3_22100062.cpp
+Greedy 관련
+https://github.com/Kumar-laxmi/Algorithms/blob/main/C%2B%2B/Greedy-Algorithm/fractional_knapsack.cpp
+Blog:
+
+*/
 #include <iostream>
 #include <vector>
 #include <algorithm>
@@ -15,7 +28,7 @@ struct Item {
 };
 
 vector<Item> generateItems(int n) {
-    srand(100); // 고정 시드
+    srand(100);
     vector<Item> items(n);
     for (int i = 0; i < n; i++) {
         items[i].benefit = rand() % 500 + 1;
@@ -165,6 +178,6 @@ int main() {
     test(31);
     test(100);
     test(1000);
-    // test(10000); // 시간 초과 주의!
+    test(10000);
     return 0;
 }
