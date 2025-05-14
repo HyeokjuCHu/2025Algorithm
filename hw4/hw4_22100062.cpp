@@ -8,21 +8,23 @@ DP 관련
 hw3_22100062.cpp
 Greedy 관련
 https://github.com/Kumar-laxmi/Algorithms/blob/main/C%2B%2B/Greedy-Algorithm/fractional_knapsack.cpp
-Blog:
+
+chrono library https://en.cppreference.com/w/cpp/chrono
+CPU 측정 https://velog.io/@zeouscik/C-%EC%BD%94%EB%93%9C-%EC%8B%A4%ED%96%89-%EC%8B%9C%EA%B0%84
 
 */
 #include <iostream> //기본 입출력
-#include <vector>   //
-#include <algorithm>
-#include <chrono>   //시간 측정 및 처리
-#include <cstdlib>
-#include <ctime>
-#include <queue>
+#include <vector>   //벡터
+#include <algorithm>    //sort
+#include <chrono>   //코드 실행 시간 측정 및 처리
+#include <cstdlib>  //rand
+#include <ctime>    //CPU 시간 처리
+#include <queue>    //stl queue
 
 using namespace std;
 using namespace std::chrono;
 
-struct Item {
+struct Item { //구조체
     int weight, benefit;
     double ratio;
 };
