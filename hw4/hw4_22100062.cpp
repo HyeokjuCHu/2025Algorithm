@@ -151,7 +151,7 @@ void test(int n) {
 
     cout << "Items: " << n << ", Capacity: " << W << endl;
 
-    auto start = high_resolution_clock::now();
+    auto start = high_resolution_clock::now(); //auto를 사용함으로써 반환 타입을 정확히 명시함을 간소화 가능
     int b = knapsackBrute(items, W);
     auto end = high_resolution_clock::now();
     auto t1 = duration<double, milli>(end - start).count();
