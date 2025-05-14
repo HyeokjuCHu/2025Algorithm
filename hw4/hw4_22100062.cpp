@@ -14,6 +14,9 @@ chrono library https://en.cppreference.com/w/cpp/chrono
 CPU 측정 https://velog.io/@zeouscik/C-%EC%BD%94%EB%93%9C-%EC%8B%A4%ED%96%89-%EC%8B%9C%EA%B0%84
 
 */
+
+//100부터는 시간 오래 걸립니다.
+
 #include <iostream> //기본 입출력
 #include <vector>   //벡터
 #include <algorithm>    //sort
