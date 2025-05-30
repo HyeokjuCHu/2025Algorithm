@@ -1,3 +1,7 @@
+/*
+강의 자료: week_10_DFSapp_up.pdf  9쪽부터 아래 다
+웹: https://yoongrammer.tistory.com/86
+*/
 #include <iostream>
 #include <vector>
 #include <map>
@@ -7,11 +11,11 @@
 
 using namespace std;
 
-const int MAX_NODES = 10;
+const int MAX_NODES = 10; //10개로 제한
 
 struct Graph {
     map<char, vector<char>> adjList; // 인접 리스트
-    set<char> vertices;              // 정점 목록
+    set<char> vertices;              // vertices
 };
 
 map<char, int> startTime;
@@ -28,7 +32,7 @@ void addVertex(Graph& g, char v) {
     }
 }
 
-// 간선 추가 (알파벳 정렬 유지)
+// add edge
 void addEdge(Graph& g, char from, char to) {
     addVertex(g, from);
     addVertex(g, to);
@@ -36,7 +40,7 @@ void addEdge(Graph& g, char from, char to) {
     vector<char>& neighbors = g.adjList[from];
     if (find(neighbors.begin(), neighbors.end(), to) == neighbors.end()) {
         neighbors.push_back(to);
-        sort(neighbors.begin(), neighbors.end()); // 알파벳 순 정렬
+        sort(neighbors.begin(), neighbors.end()); // sort alphabetical
     }
 }
 
@@ -52,10 +56,10 @@ void dfsVisit(Graph& g, char v) {
     }
 
     finishTime[v] = ++timer;
-    topoStack.push(v); // 위상 정렬을 위한 후위 스택
+    topoStack.push(v); // for topological sort
 }
 
-// DFS 시작
+// DFS start
 void DFS(Graph& g) {
     for (char v : g.vertices) {
         if (visited.find(v) == visited.end()) {
@@ -64,7 +68,7 @@ void DFS(Graph& g) {
     }
 }
 
-// 인접 리스트 출력
+// adj list
 void printGraph(Graph& g) {
     cout << "\nAdjacency List:\n";
     for (char v : g.vertices) {
@@ -76,7 +80,7 @@ void printGraph(Graph& g) {
     }
 }
 
-// 시간 정보 출력
+// time print
 void printTimes() {
     cout << "\nStart and Finish Times:\n";
     for (auto& p : startTime) {
@@ -85,7 +89,7 @@ void printTimes() {
     }
 }
 
-// 위상 정렬 결과 출력
+// topological sort result print
 void printTopologicalSort() {
     cout << "\nTopological Order:\n";
     while (!topoStack.empty()) {
@@ -98,7 +102,6 @@ void printTopologicalSort() {
 int main() {
     Graph g;
 
-    // 예시 DAG 구성 (사이클 없음)
     addEdge(g, 'A', 'B');
     addEdge(g, 'A', 'C');
     addEdge(g, 'B', 'D');
