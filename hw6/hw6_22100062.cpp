@@ -149,7 +149,7 @@ int main() {
   vector<vector<int>> adjMatrix;
 
   if (!readGraph("homework6.data", cities, adjMatrix)) {
-    return 1; // Mission abort.
+    return 1;
   }
 
   int n = cities.size();
