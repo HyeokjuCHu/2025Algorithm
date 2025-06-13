@@ -1,108 +1,177 @@
+/*
+ 
+
+ */
+
 #include <iostream>
-#include <fstream>
 #include <vector>
 #include <string>
+#include <fstream>
 #include <sstream>
 #include <queue>
 #include <limits>
 #include <iomanip>
 
+// The forbidden spell 'using namespace std;' is cast.
+// All names from std are now in the global scope. Handle with care.
 using namespace std;
 
-const int INF = 1e9;
-const int MAX_V = 20;
+// A large enough integer to represent infinity.
+// Dividing by 2 prevents overflow during addition (INF + weight).
+const int INF = numeric_limits<int>::max() / 2;
 
-int V;
-vector<string> city_names;
-vector<vector<int>> adj_matrix;
-vector<vector<pair<int, int>>> adj_list;
+// Function to print the results in a clean, readable matrix format.
+void printMatrix(const string &title, const vector<vector<int>> &dist,
+                 const vector<string> &cities) {
+  cout << title << endl;
+  int n = cities.size();
 
-// 문자열 "INF"를 정수 INF로 변환
-int parseWeight(const string& s) {
-    if (s == "INF") return INF;
-    return stoi(s);
-}
+  // Print header row (city names)
+  cout << left << setw(10) << " ";
+  for (const auto &city : cities) {
+    cout << setw(8) << city.substr(0, 7);
+  }
+  cout << endl;
 
-// 그래프 파일 읽기
-void readGraph(const string& filename) {
-    ifstream infile(filename);
-    string line;
-    while (getline(infile, line)) {
-        istringstream iss(line);
-        string value;
-        vector<int> row;
-        while (getline(iss, value, '\t')) {
-            row.push_back(parseWeight(value));
-        }
-        adj_matrix.push_back(row);
+  // Print each city's shortest path data
+  for (int i = 0; i < n; ++i) {
+    cout << left << setw(10) << cities[i].substr(0, 9);
+    for (int j = 0; j < n; ++j) {
+      if (dist[i][j] >= INF) {
+        cout << setw(8) << "INF";
+      } else {
+        cout << setw(8) << dist[i][j];
+      }
     }
-    V = adj_matrix.size();
+    cout << endl;
+  }
+  cout << endl;
+}
 
-    // 인접 리스트 생성
-    adj_list.resize(V);
-    for (int i = 0; i < V; ++i) {
-        for (int j = 0; j < V; ++j) {
-            if (adj_matrix[i][j] != INF && i != j) {
-                adj_list[i].emplace_back(j, adj_matrix[i][j]);
-            }
-        }
+// Function to parse the input file (homework6.data).
+// This is the intelligence gathering phase.
+bool readGraph(const string &filename, vector<string> &cities,
+               vector<vector<int>> &adjMatrix) {
+  ifstream file(filename);
+  if (!file.is_open()) {
+    cerr << "Error: Could not open intel file " << filename << endl;
+    return false;
+  }
+
+  // First line is the header with city names.
+  string line, word;
+  if (getline(file, line)) {
+    stringstream ss(line);
+    while (ss >> word) {
+      cities.push_back(word);
     }
-}
+  }
 
-// Dijkstra Algorithm (from source to all vertices)
-vector<int> dijkstra(int src) {
-    vector<int> dist(V, INF);
-    dist[src] = 0;
-    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<>> pq;
-    pq.emplace(0, src);
+  int n = cities.size();
+  if (n == 0) {
+    cerr << "Error: Intel file is empty or header is missing." << endl;
+    return false;
+  }
+  adjMatrix.assign(n, vector<int>(n));
 
-    while (!pq.empty()) {
-        auto [d, u] = pq.top(); pq.pop();
-        if (d > dist[u]) continue;
-        for (auto [v, w] : adj_list[u]) {
-            if (dist[v] > dist[u] + w) {
-                dist[v] = dist[u] + w;
-                pq.emplace(dist[v], v);
-            }
-        }
+  // Read the adjacency matrix data.
+  for (int i = 0; i < n; ++i) {
+    if (!getline(file, line)) {
+      cerr << "Error: Incomplete matrix data. Expected " << n
+           << " rows, but file ended." << endl;
+      return false;
     }
-    return dist;
-}
-
-// Floyd-Warshall Algorithm
-vector<vector<int>> floydWarshall() {
-    vector<vector<int>> dist = adj_matrix;
-    for (int k = 0; k < V; ++k)
-        for (int i = 0; i < V; ++i)
-            for (int j = 0; j < V; ++j)
-                if (dist[i][k] != INF && dist[k][j] != INF)
-                    dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j]);
-    return dist;
-}
-
-// 결과 출력
-void printDistanceMatrix(const vector<vector<int>>& dist) {
-    for (const auto& row : dist) {
-        for (int d : row) {
-            if (d == INF) cout << "INF\t";
-            else cout << d << "\t";
-        }
-        cout << "\n";
+    stringstream ss(line);
+    ss >> word; // Skip the row header (city name).
+    for (int j = 0; j < n; ++j) {
+      if (!(ss >> word)) {
+        cerr << "Error: Incomplete matrix row for " << cities[i] << endl;
+        return false;
+      }
+      if (word == "INF") {
+        adjMatrix[i][j] = INF;
+      } else {
+        adjMatrix[i][j] = stoi(word);
+      }
     }
+  }
+  file.close();
+  return true;
 }
 
+// Tactic 1: Dijkstra's Algorithm - The Elite Agent
+// Finds shortest paths from a single source. We'll deploy it |V| times.
+vector<int> dijkstra(int startNode, int n,
+                     const vector<vector<int>> &adjMatrix) {
+  vector<int> dist(n, INF);
+  dist[startNode] = 0;
+
+  // Min-priority queue: {distance, vertex}. The agent's primary tool.
+  priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>>
+    pq;
+  pq.push({0, startNode});
+
+  while (!pq.empty()) {
+    int d = pq.top().first;
+    int u = pq.top().second;
+    pq.pop();
+
+    if (d > dist[u]) continue;
+
+    for (int v = 0; v < n; ++v) {
+      if (adjMatrix[u][v] != INF && dist[u] + adjMatrix[u][v] < dist[v]) {
+        dist[v] = dist[u] + adjMatrix[u][v];
+        pq.push({dist[v], v});
+      }
+    }
+  }
+  return dist;
+}
+
+// Tactic 2: Floyd-Warshall Algorithm - The Brute Force Squad
+// Checks all possible intermediate nodes for all pairs. Simple but powerful.
+vector<vector<int>> floydWarshall(int n,
+                                  const vector<vector<int>> &adjMatrix) {
+  vector<vector<int>> dist = adjMatrix;
+
+  // The classic triple-loop assault.
+  for (int k = 0; k < n; ++k) {   // Intermediate node
+    for (int i = 0; i < n; ++i) { // Start node
+      for (int j = 0; j < n; ++j) { // End node
+        if (dist[i][k] < INF && dist[k][j] < INF) {
+          dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j]);
+        }
+      }
+    }
+  }
+  return dist;
+}
+
+// The Control Tower: main function orchestrating the operation.
 int main() {
-    readGraph("homework6.data");
+  vector<string> cities;
+  vector<vector<int>> adjMatrix;
 
-    cout << "1) The shortest distance between cities using Dijkstra's algorithm is:\n";
-    vector<vector<int>> dij_result(V, vector<int>(V));
-    for (int i = 0; i < V; ++i)
-        dij_result[i] = dijkstra(i);
-    printDistanceMatrix(dij_result);
+  // Phase 1: Gather intelligence.
+  if (!readGraph("homework6.data", cities, adjMatrix)) {
+    return 1; // Mission abort.
+  }
 
-    cout << "\n2) The shortest distance between cities using Floyd's algorithm is:\n";
-    auto floyd_result = floydWarshall();
-    printDistanceMatrix(floyd_result);
+  int n = cities.size();
 
-    return 0;
-}
+  // Phase 2: Execute Tactic 1 (Dijkstra x |V|).
+  vector<vector<int>> dijkstraResults(n, vector<int>(n));
+  for (int i = 0; i < n; ++i) {
+    dijkstraResults[i] = dijkstra(i, n, adjMatrix);
+  }
+  printMatrix(
+    "1) The shortest distance between cities using Dijkstra's algorithm is:",
+    dijkstraResults, cities);
+
+  // Phase 3: Execute Tactic 2 (Floyd-Warshall).
+  vector<vector<int>> floydResults = floydWarshall(n, adjMatrix);
+  printMatrix(
+    "2) The shortest distance between cities using Floyd's algorithm is:",
+    floydResults, cities);
+
+  return 0;
