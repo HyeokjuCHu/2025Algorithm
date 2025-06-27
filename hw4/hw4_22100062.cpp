@@ -12,7 +12,6 @@ https://github.com/Kumar-laxmi/Algorithms/blob/main/C%2B%2B/Greedy-Algorithm/fra
 
 chrono library https://en.cppreference.com/w/cpp/chrono
 CPU 측정 https://velog.io/@zeouscik/C-%EC%BD%94%EB%93%9C-%EC%8B%A4%ED%96%89-%EC%8B%9C%EA%B0%84
-
 */
 
 //100부터는 시간 오래 걸립니다.
@@ -28,7 +27,7 @@ CPU 측정 https://velog.io/@zeouscik/C-%EC%BD%94%EB%93%9C-%EC%8B%A4%ED%96%89-%E
 using namespace std;
 using namespace std::chrono;
 
-struct Item { //구조체
+struct Item {//구조체
     int weight, benefit;
     double ratio;
 };
@@ -45,7 +44,7 @@ vector<Item> generateItems(int n) {
     return items; //return the generated list of items
 }
 
-// 1. Brute Force by ChatGpt
+// Brute Force
 int knapsackBrute(const vector<Item>& items, int W, int idx = 0, int currWeight = 0, int currBenefit = 0) {
     if (idx == items.size()) return (currWeight <= W) ? currBenefit : 0;
     int include = knapsackBrute(items, W, idx + 1, currWeight + items[idx].weight, currBenefit + items[idx].benefit);
@@ -53,13 +52,13 @@ int knapsackBrute(const vector<Item>& items, int W, int idx = 0, int currWeight 
     return max(include, exclude);
 }
 
-// 2. Greedy (Fractional)
+// Greedy (Fractional)
 double knapsackGreedy(vector<Item> items, int W) {
     sort(items.begin(), items.end(), [](Item a, Item b) {
         return a.ratio > b.ratio;
     });
     double totalBenefit = 0;
-    // Greedy pick items to fill the knapsack
+     //greedy pick items to fill the knapsack
     for (auto& item : items) {
         if (W >= item.weight) { //item can fit in the knapsack
             W -= item.weight; //가능한 용량 줄이기
@@ -72,22 +71,18 @@ double knapsackGreedy(vector<Item> items, int W) {
     return totalBenefit;
 }
 
-// 3. Dynamic Programming
-int knapsackDP(const vector<Item>& items, int W) {
-    int n = items.size();
-    vector<vector<int>> dp(n+1, vector<int>(W+1, 0));
-    for (int i = 1; i <= n; i++) {
-        for (int w = 0; w <= W; w++) {
-            if (items[i-1].weight <= w)
-                dp[i][w] = max(dp[i-1][w], items[i-1].benefit + dp[i-1][w - items[i-1].weight]);
-            else
-                dp[i][w] = dp[i-1][w];
+//dynamic Programming
+int knapsackDP_optimized(const vector<Item>& items, int W) {
+    vector<int> dp(W + 1, 0);
+    for (auto& item : items) {
+        for (int w = W; w >= item.weight; --w) {
+            dp[w] = max(dp[w], dp[w - item.weight] + item.benefit);
         }
     }
-    return dp[n][W];
+    return dp[W];
 }
 
-// 4. Branch and Bound
+// Branch and Bound
 struct Node {
     int level, benefit, weight;
     double bound;
@@ -99,16 +94,18 @@ struct Node {
 double bound(const Node& u, int W, int n, const vector<Item>& items) {
     if (u.weight >= W) return 0; //최대용량 넘어가면 0으로 return
     double profitBound = u.benefit;
-    int j = u.level + 1;
-    int totWeight = u.weight;
+    int weightSum = u.weight;
+    int i = u.level + 1;
 
-    while (j < n && totWeight + items[j].weight <= W) {
-        totWeight += items[j].weight;
-        profitBound += items[j].benefit;
-        j++;
+    while (i < n && weightSum + items[i].weight <= W) {
+        weightSum += items[i].weight;
+        profitBound += items[i].benefit;
+        i++;
     }
-    if (j < n)
-        profitBound += (W - totWeight) * items[j].ratio;
+
+    if (i < n)
+        profitBound += (W - weightSum) * items[i].ratio;
+
     return profitBound;
 }
 
@@ -121,7 +118,7 @@ int knapsackBB(vector<Item> items, int W) {
     Node u, v;
     int n = items.size();
     v.level = -1; v.benefit = v.weight = 0;
-    v.bound = bound(v, W, n, items); // calculate the bound for the initial node
+    v.bound = bound(v, W, n, items);// calculate the bound for the initial node
     Q.push(v);//add the initial node to the priority queue
     int maxProfit = 0;
 
@@ -147,7 +144,7 @@ int knapsackBB(vector<Item> items, int W) {
     return maxProfit;
 }
 
-// 테스트 및 출력
+// 테스트 함수
 void test(int n) {
     auto items = generateItems(n);
     int W = n * 25;// set knapsack capacity based on the number of items
@@ -158,26 +155,27 @@ void test(int n) {
     int b = knapsackBrute(items, W);
     auto end = high_resolution_clock::now();
     auto t1 = duration<double, milli>(end - start).count();
+    cout << "Brute Force   : " << t1 << "ms / " << b << endl;
 
     start = high_resolution_clock::now();
     double g = knapsackGreedy(items, W);
     end = high_resolution_clock::now();
     auto t2 = duration<double, milli>(end - start).count();
+    cout << "Greedy        : " << t2 << "ms / " << g << endl;
 
     start = high_resolution_clock::now();
-    int d = knapsackDP(items, W);
+    int d = knapsackDP_optimized(items, W);
     end = high_resolution_clock::now();
     auto t3 = duration<double, milli>(end - start).count();
+    cout << "Dynamic Prog. : " << t3 << "ms / " << d << endl;
 
     start = high_resolution_clock::now();
     int bb = knapsackBB(items, W);
     end = high_resolution_clock::now();
     auto t4 = duration<double, milli>(end - start).count();
+    cout << "Branch&Bound  : " << t4 << "ms / " << bb << endl;
 
-    cout << "Brute Force   : " << t1 << "ms / " << b << endl;
-    cout << "Greedy        : " << t2 << "ms / " << g << endl;
-    cout << "Dynamic Prog. : " << t3 << "ms / " << d << endl;
-    cout << "Branch&Bound  : " << t4 << "ms / " << bb << endl << endl;
+    cout << "------------------------------\n";
 }
 
 int main() {
